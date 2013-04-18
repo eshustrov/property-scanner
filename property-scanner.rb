@@ -7,6 +7,8 @@ require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
 
+EXCLUSIONS_FILE = 'property-exclude.list'
+
 LAND = 'Bayern'
 TOWN = 'Muenchen'
 ROOMS = '2'
@@ -20,10 +22,16 @@ LINK_PARAMS = "/Wohnung-Miete/#{LAND}/#{TOWN}/-/#{ROOMS},00-/-/-/-/-/-/#{KITCHEN
 
 PAGER_PATTERN = /Seite ([0-9]+) von ([0-9]+)/
 
+def exclusions
+  File.read(EXCLUSIONS_FILE).strip.split /\s+/
+end
+
+EXCLUSIONS = exclusions
+
 def apartment_links
   links = []
-  (1..Float::INFINITY).each do |page_index|
   #(1..1).each do |page_index|
+  (1..Float::INFINITY).each do |page_index|
     page_link = "#{HOST}#{LINK_BASE}#{page_index}#{LINK_PARAMS}"
     page = Nokogiri::HTML(open page_link)
     links += page.css('li.is24-res-entry h3 a @href').map { |href| "#{HOST}#{href.text[/[^;]*/]}" }
@@ -73,16 +81,18 @@ def extract_number(string)
 end
 
 doc = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') { apartments }.doc
-doc.root.add_previous_sibling(Nokogiri::XML::ProcessingInstruction.new(doc, "xml-stylesheet",
+doc.root.add_previous_sibling(Nokogiri::XML::ProcessingInstruction.new(doc, 'xml-stylesheet',
                                                                        'type="text/xsl" href="apartments.xslt"'))
 
 apartment_links.each do |link|
+  id = extract_id link
+  next if EXCLUSIONS.include? id
   page = Nokogiri::HTML(open link)
   pets = translate_pets(page_field(page, '.is24qa-haustiere'))
   cost = page_field(page, '.is24qa-gesamtmiete text()[last()]')
   next unless pets_allowed?(pets) and not cost.empty?
   doc.root << doc.create_element('apartment') do |apartment|
-    apartment['id'] = extract_id link
+    apartment['id'] = id
     apartment << doc.create_element('link', link)
     apartment << doc.create_element('pets', pets)
     apartment << doc.create_element('cost', cost) { |node| node['number'] = extract_number cost }
