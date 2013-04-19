@@ -15,6 +15,10 @@ tr.maybe {
     background-color: #ffc;
 }
 
+tr.unknown {
+    background-color: #fcc;
+}
+
 td {
     border-top: solid 1px #ccc;
     padding: 3px;
