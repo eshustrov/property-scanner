@@ -13,7 +13,7 @@ LAND = 'Bayern'
 TOWN = 'Muenchen'
 ROOMS = '2'
 KITCHEN = 'true'
-FROM = '2000'
+FROM = '1990'
 TO = '2100'
 
 HOST = 'http://www.immobilienscout24.de'
