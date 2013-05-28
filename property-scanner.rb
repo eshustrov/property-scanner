@@ -65,7 +65,7 @@ end
 
 def pets_allowed?(pets)
   case pets
-    when 'yes', 'maybe', 'unknown'
+    when 'yes', 'maybe' #, 'unknown'
       true
     else
       false
