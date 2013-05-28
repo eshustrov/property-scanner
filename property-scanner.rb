@@ -20,8 +20,6 @@ HOST = 'http://www.immobilienscout24.de'
 LINK_BASE = '/Suche/S-T/P-'
 LINK_PARAMS = "/Wohnung-Miete/#{LAND}/#{TOWN}/-/#{ROOMS},00-/-/-/-/-/-/#{KITCHEN}/-/-/-/-/-/-/-/#{FROM}bis#{TO}"
 
-PAGER_PATTERN = /Seite ([0-9]+) von ([0-9]+)/
-
 def exclusions
   File.read(EXCLUSIONS_FILE).strip.split /\s+/
 end
@@ -35,11 +33,10 @@ def apartment_links
     page_link = "#{HOST}#{LINK_BASE}#{page_index}#{LINK_PARAMS}"
     page = Nokogiri::HTML(open page_link)
     links += page.css('li.is24-res-entry h3 a @href').map { |href| "#{HOST}#{href.text[/[^;]*/]}" }
-    pager = page.css('p.is24-pager-s').text
-    page_number = pager[PAGER_PATTERN, 1].to_i
-    page_count = pager[PAGER_PATTERN, 2].to_i
-    puts "Page #{page_number} of #{page_count}"
-    break if page_number >= page_count
+    result_count = page.css('#resultCount').text.to_i
+    page_count = (result_count - 1) / 20 + 1
+    puts "Page #{page_index} of #{page_count}"
+    break if page_index >= page_count
   end
   links
 end
