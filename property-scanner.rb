@@ -11,7 +11,7 @@ EXCLUSIONS_FILE = 'property-exclude.list'
 
 LAND = 'Bayern'
 TOWN = 'Muenchen'
-ROOMS = '2'
+ROOMS = '3'
 KITCHEN = 'true'
 FROM = '1990'
 TO = '2100'
@@ -81,13 +81,19 @@ doc = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') { apartments }.doc
 doc.root.add_previous_sibling(Nokogiri::XML::ProcessingInstruction.new(doc, 'xml-stylesheet',
                                                                        'type="text/xsl" href="apartments.xslt"'))
 
+total_number = 0
+possible_number = 0
+allowed_number = 0
 apartment_links.each do |link|
+  total_number += 1
   id = extract_id link
   next if EXCLUSIONS.include? id
   page = Nokogiri::HTML(open link)
   pets = translate_pets(page_field(page, '.is24qa-haustiere'))
   cost = page_field(page, '.is24qa-gesamtmiete text()[last()]')
   next unless pets_allowed?(pets) and not cost.empty?
+  possible_number += 1
+  allowed_number += 1 if pets == 'yes'
   doc.root << doc.create_element('apartment') do |apartment|
     apartment['id'] = id
     apartment << doc.create_element('link', link)
@@ -98,3 +104,11 @@ apartment_links.each do |link|
 end
 
 File.open('apartments.xml', 'w') { |file| file << doc }
+
+possible_ratio = (possible_number * 1000 + total_number / 2) / total_number / 10.0
+allowed_possible_ratio = (allowed_number * 1000 + possible_number / 2) / possible_number / 10.0
+allowed_total_ratio = (allowed_number * 1000 + total_number / 2) / total_number / 10.0
+
+puts "total apartments: #{total_number}"
+puts "possible appartments: #{possible_number} (#{possible_ratio}%)"
+puts "allowed apartments: #{allowed_number} (#{allowed_possible_ratio}% / #{allowed_total_ratio}%)"
