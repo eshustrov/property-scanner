@@ -13,7 +13,7 @@ LAND = 'Bayern'
 TOWN = 'Muenchen'
 ROOMS = '3'
 KITCHEN = 'true'
-FROM = '1990'
+FROM = '2000'
 TO = '2100'
 
 HOST = 'http://www.immobilienscout24.de'
@@ -140,6 +140,6 @@ end
 total_costs.sort!
 possible_costs.sort!
 allowed_costs.sort!
-puts "total apartments: #{total_number} @ #{first total_costs}(#{second total_costs})"
-puts "possible appartments: #{possible_number} (#{possible_ratio}%) @ #{first possible_costs}(#{second possible_costs})"
-puts "allowed apartments: #{allowed_number} (#{allowed_possible_ratio}% / #{allowed_total_ratio}%) @ #{first allowed_costs}(#{second allowed_costs})"
+puts "total:    #{total_number} @ [1]:#{first total_costs}, [2]:#{second total_costs}"
+puts "possible: #{possible_number} (#{possible_ratio}%) @ [1]:#{first possible_costs}, [2]:#{second possible_costs}"
+puts "allowed:  #{allowed_number} (#{allowed_possible_ratio}% / #{allowed_total_ratio}%) @ [1]:#{first allowed_costs}, [2]:#{second allowed_costs}"
