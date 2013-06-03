@@ -77,13 +77,20 @@ def extract_number(string)
   string[/[0-9,]+/].gsub(/,/, '')
 end
 
+def to_number(string)
+  (extract_number string).to_i
+end
+
 doc = Nokogiri::XML::Builder.new(:encoding => 'UTF-8') { apartments }.doc
 doc.root.add_previous_sibling(Nokogiri::XML::ProcessingInstruction.new(doc, 'xml-stylesheet',
                                                                        'type="text/xsl" href="apartments.xslt"'))
 
 total_number = 0
+total_costs = []
 possible_number = 0
+possible_costs = []
 allowed_number = 0
+allowed_costs = []
 apartment_links.each do |link|
   total_number += 1
   id = extract_id link
@@ -91,9 +98,14 @@ apartment_links.each do |link|
   page = Nokogiri::HTML(open link)
   pets = translate_pets(page_field(page, '.is24qa-haustiere'))
   cost = page_field(page, '.is24qa-gesamtmiete text()[last()]')
+  total_costs << to_number(cost) unless cost.empty?
   next unless pets_allowed?(pets) and not cost.empty?
   possible_number += 1
-  allowed_number += 1 if pets == 'yes'
+  possible_costs << to_number(cost)
+  if pets == 'yes'
+    allowed_number += 1
+    allowed_costs << to_number(cost)
+  end
   doc.root << doc.create_element('apartment') do |apartment|
     apartment['id'] = id
     apartment << doc.create_element('link', link)
@@ -109,6 +121,25 @@ possible_ratio = (possible_number * 1000 + total_number / 2) / total_number / 10
 allowed_possible_ratio = (allowed_number * 1000 + possible_number / 2) / possible_number / 10.0
 allowed_total_ratio = (allowed_number * 1000 + total_number / 2) / total_number / 10.0
 
-puts "total apartments: #{total_number}"
-puts "possible appartments: #{possible_number} (#{possible_ratio}%)"
-puts "allowed apartments: #{allowed_number} (#{allowed_possible_ratio}% / #{allowed_total_ratio}%)"
+def array_element(array, index)
+  if index >= array.size
+    '-'
+  else
+    array[index]
+  end
+end
+
+def first(array)
+  array_element(array, 0)
+end
+
+def second(array)
+  array_element(array, 1)
+end
+
+total_costs.sort!
+possible_costs.sort!
+allowed_costs.sort!
+puts "total apartments: #{total_number} @ #{first total_costs}(#{second total_costs})"
+puts "possible appartments: #{possible_number} (#{possible_ratio}%) @ #{first possible_costs}(#{second possible_costs})"
+puts "allowed apartments: #{allowed_number} (#{allowed_possible_ratio}% / #{allowed_total_ratio}%) @ #{first allowed_costs}(#{second allowed_costs})"
