@@ -31,13 +31,15 @@ def apartment_links
   #(1..1).each do |page_index|
   (1..Float::INFINITY).each do |page_index|
     page_link = "#{HOST}#{LINK_BASE}#{page_index}#{LINK_PARAMS}"
+    puts page_link
     page = Nokogiri::HTML(open page_link)
-    links += page.css('li.is24-res-entry h3 a @href').map { |href| "#{HOST}#{href.text[/[^;]*/]}" }
+    links += page.css('.medialist__heading a @href').map { |href| "#{HOST}#{href.text[/[^;]*/]}" }
     result_count = page.css('#resultCount').text.to_i
     page_count = (result_count - 1) / 20 + 1
     puts "Page #{page_index} of #{page_count}"
     break if page_index >= page_count
   end
+puts links.size
   links
 end
 
