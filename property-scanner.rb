@@ -42,7 +42,6 @@ def apartment_links
   #(1..1).each do |page_index|
   (1..Float::INFINITY).each do |page_index|
     page_link = "#{HOST}#{LINK_BASE}#{page_index}#{LINK_PARAMS}"
-    puts page_link
     page = Nokogiri::HTML(open page_link)
     links += page.css('.medialist__heading a @href').map { |href| "#{HOST}#{href.text[/[^;]*/]}" }
     result_count = page.css('#resultCount').text.to_i
@@ -50,7 +49,6 @@ def apartment_links
     puts "Page #{page_index} of #{page_count}"
     break if page_index >= page_count
   end
-puts links.size
   links
 end
 
