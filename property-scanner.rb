@@ -9,8 +9,10 @@ require 'open-uri'
 
 EXCLUSIONS_FILE = 'property-exclude.list'
 
-LAND = 'Bayern'
-TOWN = 'Muenchen'
+LAND = 'Umkreissuche'
+TOWN = 'M_fcnchen_20_28Kreis_29/-/118984/2024595/-/-'
+#LAND = 'Bayern'
+#TOWN = 'Muenchen'
 #TOWN = 'Rosenheim'
 #TOWN = 'Augsburg'
 #TOWN = 'Dachau-Kreis'
@@ -22,14 +24,16 @@ TOWN = 'Muenchen'
 #TOWN = 'Karlsruhe'
 #LAND = 'Berlin'
 #TOWN = 'Berlin'
+RADIUS = '20'
+#RADIUS = '-'
 ROOMS = '3'
 KITCHEN = 'true'
 FROM = '2000'
-TO = '2100'
+TILL = '2100'
 
 HOST = 'http://www.immobilienscout24.de'
 LINK_BASE = '/Suche/S-T/P-'
-LINK_PARAMS = "/Wohnung-Miete/#{LAND}/#{TOWN}/-/#{ROOMS},00-/-/-/-/-/-/#{KITCHEN}/-/-/-/-/-/-/-/#{FROM}bis#{TO}"
+LINK_PARAMS = "/Wohnung-Miete/#{LAND}/#{TOWN}/#{RADIUS}/#{ROOMS},00-/-/-/-/-/-/#{KITCHEN}/-/-/-/-/-/-/-/#{FROM}bis#{TILL}"
 
 def exclusions
   File.read(EXCLUSIONS_FILE).strip.split /\s+/
