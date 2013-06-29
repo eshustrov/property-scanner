@@ -9,10 +9,10 @@ require 'open-uri'
 
 EXCLUSIONS_FILE = 'property-exclude.list'
 
-LAND = 'Umkreissuche'
-TOWN = 'M_fcnchen_20_28Kreis_29/-/118984/2024595/-/-'
-#LAND = 'Bayern'
-#TOWN = 'Muenchen'
+LAND1 = 'Umkreissuche'
+TOWN1 = 'M_fcnchen_20_28Kreis_29/-/118984/2024595/-/-'
+LAND2 = 'Bayern'
+TOWN2 = 'Muenchen'
 #TOWN = 'Rosenheim'
 #TOWN = 'Augsburg'
 #TOWN = 'Dachau-Kreis'
@@ -24,8 +24,8 @@ TOWN = 'M_fcnchen_20_28Kreis_29/-/118984/2024595/-/-'
 #TOWN = 'Karlsruhe'
 #LAND = 'Berlin'
 #TOWN = 'Berlin'
-RADIUS = '20'
-#RADIUS = '-'
+RADIUS1 = '20'
+RADIUS2 = '-'
 ROOMS = '3'
 KITCHEN = 'true'
 FROM = '2000'
@@ -33,7 +33,10 @@ TILL = '2100'
 
 HOST = 'http://www.immobilienscout24.de'
 LINK_BASE = '/Suche/S-T/P-'
-LINK_PARAMS = "/Wohnung-Miete/#{LAND}/#{TOWN}/#{RADIUS}/#{ROOMS},00-/-/-/-/-/-/#{KITCHEN}/-/-/-/-/-/-/-/#{FROM}bis#{TILL}"
+LINK_PARAMS = [
+    "/Wohnung-Miete/#{LAND1}/#{TOWN1}/#{RADIUS1}/#{ROOMS},00-/-/-/-/-/-/#{KITCHEN}/-/-/-/-/-/-/-/#{FROM}bis#{TILL}",
+    "/Wohnung-Miete/#{LAND2}/#{TOWN2}/#{RADIUS2}/#{ROOMS},00-/-/-/-/-/-/#{KITCHEN}/-/-/-/-/-/-/-/#{FROM}bis#{TILL}"
+]
 
 def exclusions
   File.read(EXCLUSIONS_FILE).strip.split /\s+/
@@ -43,17 +46,19 @@ EXCLUSIONS = exclusions
 
 def apartment_links
   links = []
-  #(1..1).each do |page_index|
-  (1..Float::INFINITY).each do |page_index|
-    page_link = "#{HOST}#{LINK_BASE}#{page_index}#{LINK_PARAMS}"
-    page = Nokogiri::HTML(open page_link)
-    links += page.css('.medialist__heading a @href').map { |href| "#{HOST}#{href.text[/[^;]*/]}" }
-    result_count = page.css('#resultCount').text.to_i
-    page_count = (result_count - 1) / 20 + 1
-    puts "Page #{page_index} of #{page_count}"
-    break if page_index >= page_count
+  LINK_PARAMS.each do |link_param|
+    #(1..1).each do |page_index|
+    (1..Float::INFINITY).each do |page_index|
+      page_link = "#{HOST}#{LINK_BASE}#{page_index}#{link_param}"
+      page = Nokogiri::HTML(open page_link)
+      links += page.css('.medialist__heading a @href').map { |href| "#{HOST}#{href.text[/[^;]*/]}" }
+      result_count = page.css('#resultCount').text.to_i
+      page_count = (result_count - 1) / 20 + 1
+      puts "Page #{page_index} of #{page_count}"
+      break if page_index >= page_count
+    end
   end
-  links
+  links.sort!.uniq!
 end
 
 def page_field(page, path)
